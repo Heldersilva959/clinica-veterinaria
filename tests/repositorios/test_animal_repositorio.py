@@ -1,10 +1,6 @@
-<<<<<<< HEAD
 from uuid import uuid4
 import pytest
-=======
 from decimal import Decimal
-
->>>>>>> 9d0d2b72256d575a11e9ef81db8cc6701729423c
 from clinica.dominio.animal import Animal
 from clinica.dominio.atendimento import Atendimento
 from clinica.dominio.responsavel import Responsavel
@@ -30,7 +26,7 @@ def test_registrar_novo_animal_sem_atendimentos():
     assert animal_encontrado == animal
     assert animal_encontrado.atendimentos == []
 
-<<<<<<< HEAD
+
 def test_lista_animais_deve_iniciar_vazia():
     repositorio = AnimalRepositorio()
 
@@ -111,7 +107,7 @@ def test_nao_permitir_animais_com_mesmo_id():
         repositorio.adicionar(segundo_animal)
 
     assert repositorio.listar() == [primeiro_animal] 
-=======
+
 def test_remover_animais_sem_atendimentos():
     repositorio = AnimalRepositorio()
     responsavel = Responsavel(nome="Maria")
@@ -146,4 +142,3 @@ def test_nao_remover_animal_com_atendimentos():
 
     assert repositorio.listar() == [animal]
     assert repositorio.buscar_por_id(animal.id) == animal
->>>>>>> 9d0d2b72256d575a11e9ef81db8cc6701729423c
