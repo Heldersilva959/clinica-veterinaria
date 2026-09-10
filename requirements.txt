@@ -1,0 +1,4 @@
+# Dependências do projeto (uso didático / TDD).
+# Instalação: pip install -r requirements.txt
+
+pytest==9.1.1
