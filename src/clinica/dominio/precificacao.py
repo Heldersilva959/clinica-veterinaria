@@ -1,4 +1,7 @@
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
+
+PERCENTUAL_DESCONTO_FIDELIDADE = Decimal("0.10")
+ATENDIMENTOS_ANTERIORES_PARA_FIDELIDADE = 5
 
 
 def calcular_valor(tipo_servico: str) -> Decimal:
@@ -8,9 +11,46 @@ def calcular_valor(tipo_servico: str) -> Decimal:
         return Decimal("180.00")
     elif tipo_servico == "consulta_emergencia":
         return Decimal("250.00")
-    
+
     raise ValueError("Tipo de serviço inválido")
+
 
 def validar_valor_servico(valor: Decimal) -> None:
     if valor <= Decimal("0.00"):
         raise ValueError("O valor do serviço deve ser maior que zero.")
+
+
+def arredondar(valor: Decimal) -> Decimal:
+    return valor.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+
+def tem_desconto_fidelidade(quantidade_atendimentos_anteriores: int) -> bool:
+    return (
+        quantidade_atendimentos_anteriores
+        >= ATENDIMENTOS_ANTERIORES_PARA_FIDELIDADE
+    )
+
+
+def aplicar_desconto_fidelidade(valor: Decimal) -> Decimal:
+    desconto = valor * PERCENTUAL_DESCONTO_FIDELIDADE
+
+    return arredondar(valor - desconto)
+
+
+def somar_acrescimos(acrescimos: list[Decimal]) -> Decimal:
+    return sum(acrescimos, Decimal("0.00"))
+
+
+def calcular_valor_atendimento(
+    tipo_servico: str,
+    quantidade_atendimentos_anteriores: int = 0,
+    acrescimo: Decimal = Decimal("0.00"),
+) -> Decimal:
+    # O desconto de fidelidade incide sobre o total,
+    # ou seja, sobre o valor base somado aos acrescimos.
+    total = calcular_valor(tipo_servico) + acrescimo
+
+    if tem_desconto_fidelidade(quantidade_atendimentos_anteriores):
+        return aplicar_desconto_fidelidade(total)
+
+    return arredondar(total)
