@@ -16,7 +16,11 @@ def test_animal_deve_possuir_responsavel():
 
 def test_animal_deve_iniciar_sem_atendimentos():
     responsavel = Responsavel(nome="Maria")
-    animal = Animal(nome="Rex", responsavel=responsavel)
+    animal = Animal(
+    nome="Rex",
+    especie="cachorro",
+    responsavel=responsavel,
+)
 
     assert animal.atendimentos == []
 
