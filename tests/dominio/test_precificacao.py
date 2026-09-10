@@ -5,6 +5,7 @@ import pytest
 from clinica.dominio.precificacao import calcular_valor
 from clinica.dominio.precificacao import validar_valor_servico
 
+
 def test_calcular_valor_consulta_rotina():
     valor = calcular_valor("consulta_rotina")
 
