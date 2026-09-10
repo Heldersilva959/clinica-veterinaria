@@ -123,3 +123,52 @@ def test_animal_inexistente_lanca_excecao():
             identificador_inexistente,
             repositorio,
         )
+
+def _criar_animal():
+    responsavel = Responsavel(nome="Maria")
+
+    return Animal(nome="Rex", especie="cachorro", responsavel=responsavel)
+
+
+def test_primeiro_atendimento_nao_recebe_desconto():
+    animal = _criar_animal()
+
+    atendimento = registrar_atendimento(animal, "consulta_rotina")
+
+    assert atendimento.valor == Decimal("100.00")
+
+
+def test_quarto_atendimento_nao_recebe_desconto():
+    animal = _criar_animal()
+
+    for _ in range(3):
+        registrar_atendimento(animal, "consulta_rotina")
+
+    quarto_atendimento = registrar_atendimento(animal, "consulta_rotina")
+
+    assert animal.quantidade_atendimentos() == 4
+    assert quarto_atendimento.valor == Decimal("100.00")
+
+
+def test_quinto_atendimento_nao_recebe_desconto():
+    animal = _criar_animal()
+
+    for _ in range(4):
+        registrar_atendimento(animal, "consulta_rotina")
+
+    quinto_atendimento = registrar_atendimento(animal, "consulta_rotina")
+
+    assert animal.quantidade_atendimentos() == 5
+    assert quinto_atendimento.valor == Decimal("100.00")
+
+
+def test_sexto_atendimento_recebe_desconto_fidelidade():
+    animal = _criar_animal()
+
+    for _ in range(5):
+        registrar_atendimento(animal, "consulta_rotina")
+
+    sexto_atendimento = registrar_atendimento(animal, "consulta_rotina")
+
+    assert animal.quantidade_atendimentos() == 6
+    assert sexto_atendimento.valor == Decimal("90.00")
