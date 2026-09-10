@@ -37,8 +37,20 @@ class AnimalRepositorio:
 
         return None
 
+<<<<<<< HEAD
     def remover(self, animal_id: UUID) -> None:
         animal = self.buscar_por_id(animal_id)
 
         if animal is not None:
             self._animais.remove(animal)
+=======
+    def listar(self) -> list[Animal]:
+        return list(self._animais)
+
+    def remover_animais_sem_atendimentos(self) -> None:
+        self._animais = [
+            animal
+            for animal in self._animais
+            if animal.quantidade_atendimentos() > 0
+        ]
+>>>>>>> 9d0d2b72256d575a11e9ef81db8cc6701729423c

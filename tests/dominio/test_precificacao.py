@@ -4,6 +4,11 @@ import pytest
 
 from clinica.dominio.precificacao import calcular_valor
 from clinica.dominio.precificacao import validar_valor_servico
+from clinica.dominio.precificacao import PERCENTUAL_DESCONTO_FIDELIDADE
+from clinica.dominio.precificacao import aplicar_desconto_fidelidade
+from clinica.dominio.precificacao import tem_desconto_fidelidade
+from clinica.dominio.precificacao import calcular_valor_atendimento
+from clinica.dominio.precificacao import somar_acrescimos
 
 
 def test_calcular_valor_consulta_rotina():
@@ -42,3 +47,93 @@ def test_tipo_servico_invalido_lanca_excecao():
         match="Tipo de serviço inválido",
     ):
         calcular_valor("servico_inexistente")
+
+def test_desconto_fidelidade_deve_ser_de_dez_porcento():
+    assert PERCENTUAL_DESCONTO_FIDELIDADE == Decimal("0.10")
+
+
+def test_aplicar_desconto_fidelidade():
+    assert aplicar_desconto_fidelidade(Decimal("100.00")) == Decimal("90.00")
+    assert aplicar_desconto_fidelidade(Decimal("180.00")) == Decimal("162.00")
+    assert aplicar_desconto_fidelidade(Decimal("250.00")) == Decimal("225.00")
+
+
+def test_nao_aplicar_desconto_sem_fidelidade():
+    assert tem_desconto_fidelidade(0) is False
+    assert tem_desconto_fidelidade(4) is False
+
+    valor = calcular_valor_atendimento(
+        "consulta_rotina",
+        quantidade_atendimentos_anteriores=4,
+    )
+
+    assert valor == Decimal("100.00")
+
+
+def test_calcular_atendimento_com_desconto():
+    assert tem_desconto_fidelidade(5) is True
+
+    valor = calcular_valor_atendimento(
+        "consulta_emergencia",
+        quantidade_atendimentos_anteriores=5,
+    )
+
+    assert valor == Decimal("225.00")
+    assert isinstance(valor, Decimal)
+
+
+def test_atendimento_sem_adicional_nao_deve_ter_acrescimo():
+    valor = calcular_valor_atendimento("consulta_rotina")
+
+    assert valor == Decimal("100.00")
+
+    valor_com_acrescimo_zero = calcular_valor_atendimento(
+        "consulta_rotina",
+        acrescimo=Decimal("0.00"),
+    )
+
+    assert valor_com_acrescimo_zero == Decimal("100.00")
+
+
+def test_aplicar_acrescimo_procedimento_adicional():
+    valor = calcular_valor_atendimento(
+        "consulta_rotina",
+        acrescimo=Decimal("50.00"),
+    )
+
+    assert valor == Decimal("150.00")
+    assert isinstance(valor, Decimal)
+
+
+def test_multiplos_acrescimos_devem_ser_somados():
+    acrescimos = [Decimal("50.00"), Decimal("30.00"), Decimal("20.00")]
+
+    assert somar_acrescimos(acrescimos) == Decimal("100.00")
+    assert somar_acrescimos([]) == Decimal("0.00")
+
+    valor = calcular_valor_atendimento(
+        "consulta_rotina",
+        acrescimo=somar_acrescimos(acrescimos),
+    )
+
+    assert valor == Decimal("200.00")
+
+
+def test_calcular_atendimento_com_desconto_e_acrescimo():
+    # Regra definida: o desconto de fidelidade incide sobre o total,
+    # ou seja, sobre o valor base somado aos acrescimos.
+    valor = calcular_valor_atendimento(
+        "consulta_rotina",
+        quantidade_atendimentos_anteriores=5,
+        acrescimo=Decimal("50.00"),
+    )
+
+    assert valor == Decimal("135.00")
+
+    valor_sem_fidelidade = calcular_valor_atendimento(
+        "consulta_rotina",
+        quantidade_atendimentos_anteriores=4,
+        acrescimo=Decimal("50.00"),
+    )
+
+    assert valor_sem_fidelidade == Decimal("150.00")
