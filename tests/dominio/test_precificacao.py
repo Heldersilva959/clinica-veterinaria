@@ -13,6 +13,7 @@ from clinica.dominio.precificacao import validar_valor_final
 from clinica.dominio.precificacao import validar_acrescimo
 from clinica.dominio.precificacao import validar_desconto
 
+
 def test_calcular_valor_consulta_rotina():
     valor = calcular_valor("consulta_rotina")
 
