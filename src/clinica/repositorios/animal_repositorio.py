@@ -16,3 +16,13 @@ class AnimalRepositorio:
                 return animal
 
         return None
+
+    def listar(self) -> list[Animal]:
+        return list(self._animais)
+
+    def remover_animais_sem_atendimentos(self) -> None:
+        self._animais = [
+            animal
+            for animal in self._animais
+            if animal.quantidade_atendimentos() > 0
+        ]
