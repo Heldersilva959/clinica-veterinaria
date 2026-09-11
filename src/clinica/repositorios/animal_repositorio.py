@@ -42,8 +42,6 @@ class AnimalRepositorio:
 
         if animal is not None:
             self._animais.remove(animal)
-    def listar(self) -> list[Animal]:
-        return list(self._animais)
 
     def remover_animais_sem_atendimentos(self) -> None:
         self._animais = [
@@ -51,3 +49,13 @@ class AnimalRepositorio:
             for animal in self._animais
             if animal.quantidade_atendimentos() > 0
         ]
+
+    def ordenar_por_nome(self) -> None:
+        self._animais.sort(
+            key=lambda animal: animal.nome,
+        )
+
+    def ordenar_por_total_gasto(self) -> None:
+        self._animais.sort(
+            key=lambda animal: animal.total_gasto(),
+        )

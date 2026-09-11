@@ -142,3 +142,76 @@ def test_nao_remover_animal_com_atendimentos():
 
     assert repositorio.listar() == [animal]
     assert repositorio.buscar_por_id(animal.id) == animal
+
+def test_ordenar_animais_por_nome():
+    repositorio = AnimalRepositorio()
+    zeca = criar_animal("Zeca")
+    bidu = criar_animal("Bidu")
+    amora = criar_animal("Amora")
+
+    repositorio.adicionar(zeca)
+    repositorio.adicionar(bidu)
+    repositorio.adicionar(amora)
+
+    repositorio.ordenar_por_nome()
+
+    assert repositorio.listar() == [amora, bidu, zeca]
+
+def test_ordenar_animais_por_total_gasto():
+    repositorio = AnimalRepositorio()
+    animal_urgencia = criar_animal("Rex")
+    animal_sem_atendimento = criar_animal("Mia")
+    animal_rotina = criar_animal("Bidu")
+
+    animal_urgencia.adicionar_atendimento(
+        Atendimento(
+            tipo_servico="consulta_urgencia",
+            valor=Decimal("180.00"),
+        )
+    )
+    animal_rotina.adicionar_atendimento(
+        Atendimento(
+            tipo_servico="consulta_rotina",
+            valor=Decimal("100.00"),
+        )
+    )
+
+    repositorio.adicionar(animal_urgencia)
+    repositorio.adicionar(animal_sem_atendimento)
+    repositorio.adicionar(animal_rotina)
+
+    repositorio.ordenar_por_total_gasto()
+
+    assert repositorio.listar() == [
+        animal_sem_atendimento,
+        animal_rotina,
+        animal_urgencia,
+    ]
+
+def test_ordenar_por_total_gasto_nao_altera_valores():
+    repositorio = AnimalRepositorio()
+    animal_rotina = criar_animal("Rex")
+    animal_urgencia = criar_animal("Mia")
+
+    animal_rotina.adicionar_atendimento(
+        Atendimento(
+            tipo_servico="consulta_rotina",
+            valor=Decimal("100.00"),
+        )
+    )
+    animal_urgencia.adicionar_atendimento(
+        Atendimento(
+            tipo_servico="consulta_urgencia",
+            valor=Decimal("180.00"),
+        )
+    )
+
+    repositorio.adicionar(animal_urgencia)
+    repositorio.adicionar(animal_rotina)
+
+    repositorio.ordenar_por_total_gasto()
+
+    assert animal_rotina.total_gasto() == Decimal("100.00")
+    assert animal_urgencia.total_gasto() == Decimal("180.00")
+    assert animal_rotina.atendimentos[0].valor == Decimal("100.00")
+    assert animal_urgencia.atendimentos[0].valor == Decimal("180.00")
