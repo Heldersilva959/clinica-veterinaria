@@ -2,3 +2,4 @@
 # Instalação: pip install -r requirements.txt
 
 pytest==9.1.1
+pytest-cov==7.1.0

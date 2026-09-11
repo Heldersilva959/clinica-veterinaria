@@ -68,7 +68,6 @@ O sistema deverá permitir:
 * Pytest
 * Pytest-Cov
 * `dataclasses`
-* `enum`
 * `decimal.Decimal`
 
 Não serão utilizados:
@@ -83,21 +82,37 @@ Não serão utilizados:
 
 O objetivo é manter o projeto simples e focado em testes e regras de negócio.
 
+## Como executar
+
+Na raiz do projeto, crie o ambiente virtual e instale as dependências:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python -m pip install -r requirements.txt
+```
+
+Para rodar os testes e medir a cobertura de instruções e desvios:
+
+```powershell
+.\.venv\Scripts\python -m pytest -v
+.\.venv\Scripts\python -m pytest --cov=src/clinica --cov-branch --cov-report=term-missing
+```
+
 ## Demonstração manual
 
 O projeto inclui uma demonstração visual no terminal. Ela cadastra animais e
 responsáveis, registra atendimentos, aplica fidelidade, acréscimo e retorno
 gratuito, e mostra buscas, filtros, ordenações, ranking, remoção e faturamento.
 Um novo atendimento do mesmo animal é reconhecido automaticamente como retorno
-gratuito quando ocorre no mesmo dia ou no dia seguinte a qualquer atendimento
-anterior. Fora desse prazo, o serviço é cobrado normalmente e pode receber o
-desconto de fidelidade de 10%.
+gratuito quando ocorre no mesmo dia ou no dia seguinte a um atendimento
+cobrado; o retorno gratuito não abre um novo período de retorno. Fora desse
+prazo, o serviço é cobrado normalmente e pode receber o desconto de fidelidade
+de 10%.
 
 Na raiz do projeto, execute:
 
 ```powershell
-.\.venv\Scripts\Activate.ps1
-python demo_manual.py
+.\.venv\Scripts\python demo_manual.py
 ```
 
 A demonstração usa somente dados em memória e verifica os resultados com
@@ -127,8 +142,8 @@ Exemplos:
 Animal
 Responsavel
 Atendimento
-TipoServico
-CalculadoraAtendimento
+Servico
+precificacao (valores, fidelidade, acréscimos e retorno)
 ```
 
 
