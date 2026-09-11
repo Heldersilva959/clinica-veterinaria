@@ -88,6 +88,10 @@ O objetivo é manter o projeto simples e focado em testes e regras de negócio.
 O projeto inclui uma demonstração visual no terminal. Ela cadastra animais e
 responsáveis, registra atendimentos, aplica fidelidade, acréscimo e retorno
 gratuito, e mostra buscas, filtros, ordenações, ranking, remoção e faturamento.
+Um novo atendimento do mesmo animal é reconhecido automaticamente como retorno
+gratuito quando ocorre no mesmo dia ou no dia seguinte a qualquer atendimento
+anterior. Fora desse prazo, o serviço é cobrado normalmente e pode receber o
+desconto de fidelidade de 10%.
 
 Na raiz do projeto, execute:
 

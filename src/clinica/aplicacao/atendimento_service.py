@@ -23,6 +23,9 @@ def registrar_atendimento(
     )
     validar_valor_servico(valor)
 
+    if data is not None and identificar_retorno(animal, data) is not None:
+        return _registrar_atendimento_gratuito(animal, tipo_servico, data)
+
     atendimento = Atendimento(
         tipo_servico=tipo_servico,
         valor=valor,
@@ -45,16 +48,12 @@ def identificar_retorno(
     animal: Animal,
     data_retorno: date,
 ) -> Atendimento | None:
-    """Consulta de rotina do animal que da direito a retorno gratuito.
+    """Atendimento que permite retorno no mesmo dia ou no seguinte.
 
-    A regra vale apenas para consulta de rotina e apenas para o historico
-    do proprio animal. A data e sempre recebida de fora, nunca lida do
-    relogio do sistema.
+    A regra considera somente o histórico do próprio animal. A data é sempre
+    recebida de fora, nunca lida do relógio do sistema.
     """
     for atendimento in reversed(animal.atendimentos):
-        if atendimento.tipo_servico != "consulta_rotina":
-            continue
-
         if atendimento.data is None:
             continue
 
@@ -62,6 +61,24 @@ def identificar_retorno(
             return atendimento
 
     return None
+
+
+def _registrar_atendimento_gratuito(
+    animal: Animal,
+    tipo_servico: str,
+    data_atendimento: date,
+) -> Atendimento:
+    valor = Decimal("0.00")
+    validar_valor_final(valor)
+
+    atendimento = Atendimento(
+        tipo_servico=tipo_servico,
+        valor=valor,
+        data=data_atendimento,
+    )
+    animal.adicionar_atendimento(atendimento)
+
+    return atendimento
 
 
 def registrar_retorno(animal: Animal, data_retorno: date) -> Atendimento:
@@ -74,14 +91,4 @@ def registrar_retorno(animal: Animal, data_retorno: date) -> Atendimento:
             data=data_retorno,
         )
 
-    valor = Decimal("0.00")
-    validar_valor_final(valor)
-
-    retorno = Atendimento(
-        tipo_servico="retorno",
-        valor=valor,
-        data=data_retorno,
-    )
-    animal.adicionar_atendimento(retorno)
-
-    return retorno
+    return _registrar_atendimento_gratuito(animal, "retorno", data_retorno)

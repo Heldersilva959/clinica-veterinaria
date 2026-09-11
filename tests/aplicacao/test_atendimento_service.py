@@ -194,9 +194,9 @@ def test_sexto_atendimento_recebe_desconto_fidelidade():
     assert sexto_atendimento.valor == Decimal("90.00")
 
 
-# Regra de retorno (definida com o usuario):
-# um retorno realizado ate 15 dias, inclusive, apos uma consulta de rotina
-# do mesmo animal nao gera nova cobranca.
+# Regra de retorno (definida com o usuário):
+# um novo atendimento no mesmo dia ou no dia seguinte a qualquer atendimento
+# do mesmo animal é registrado como retorno e não gera nova cobrança.
 
 DATA_CONSULTA = date(2026, 3, 1)
 
@@ -213,53 +213,170 @@ def criar_animal_com_rotina(nome="Rex"):
 def test_identificar_retorno_dentro_do_periodo():
     animal = criar_animal_com_rotina()
 
-    consulta = identificar_retorno(animal, DATA_CONSULTA + timedelta(days=10))
+    consulta_mesmo_dia = identificar_retorno(animal, DATA_CONSULTA)
+    consulta_dia_seguinte = identificar_retorno(
+        animal,
+        DATA_CONSULTA + timedelta(days=1),
+    )
 
-    assert consulta is not None
-    assert consulta is animal.atendimentos[0]
-    assert consulta.tipo_servico == "consulta_rotina"
+    assert consulta_mesmo_dia is animal.atendimentos[0]
+    assert consulta_dia_seguinte is animal.atendimentos[0]
+    assert consulta_mesmo_dia.tipo_servico == "consulta_rotina"
 
-    assert identificar_retorno(animal, DATA_CONSULTA + timedelta(days=16)) is None
+    assert identificar_retorno(animal, DATA_CONSULTA + timedelta(days=2)) is None
+    assert identificar_retorno(animal, DATA_CONSULTA - timedelta(days=1)) is None
 
-    animal_sem_rotina = Animal(
+    animal_com_emergencia = Animal(
         nome="Mia",
         especie="gato",
         responsavel=Responsavel(nome="Maria"),
     )
     registrar_atendimento(
-        animal_sem_rotina,
+        animal_com_emergencia,
         "consulta_emergencia",
         data=DATA_CONSULTA,
     )
 
-    assert identificar_retorno(animal_sem_rotina, DATA_CONSULTA) is None
+    atendimento_anterior = identificar_retorno(
+        animal_com_emergencia,
+        DATA_CONSULTA + timedelta(days=1),
+    )
+
+    assert atendimento_anterior is animal_com_emergencia.atendimentos[0]
 
 
-def test_retorno_dentro_de_15_dias_nao_deve_ser_cobrado():
+def test_servico_diferente_no_dia_seguinte_deve_ser_retorno_gratuito():
+    animal = _criar_animal()
+    registrar_atendimento(
+        animal,
+        "consulta_urgencia",
+        data=DATA_CONSULTA,
+    )
+
+    retorno = registrar_atendimento(
+        animal,
+        "consulta_emergencia",
+        data=DATA_CONSULTA + timedelta(days=1),
+    )
+
+    assert retorno.tipo_servico == "consulta_emergencia"
+    assert retorno.valor == Decimal("0.00")
+    assert animal.total_gasto() == Decimal("180.00")
+
+
+def test_retorno_deve_permitir_novo_retorno_no_dia_seguinte():
+    animal = criar_animal_com_rotina()
+    primeiro_retorno = registrar_atendimento(
+        animal,
+        "consulta_rotina",
+        data=DATA_CONSULTA,
+    )
+
+    segundo_retorno = registrar_atendimento(
+        animal,
+        "consulta_emergencia",
+        data=DATA_CONSULTA + timedelta(days=1),
+    )
+
+    assert primeiro_retorno.valor == Decimal("0.00")
+    assert segundo_retorno.tipo_servico == "consulta_emergencia"
+    assert segundo_retorno.valor == Decimal("0.00")
+    assert animal.total_gasto() == Decimal("100.00")
+
+
+@pytest.mark.parametrize("dias_apos_consulta", [0, 1])
+def test_registrar_novo_atendimento_de_rotina_identifica_retorno_gratuito(
+    dias_apos_consulta,
+):
     animal = criar_animal_com_rotina()
 
-    retorno = registrar_retorno(animal, DATA_CONSULTA + timedelta(days=7))
+    retorno = registrar_atendimento(
+        animal,
+        "consulta_rotina",
+        data=DATA_CONSULTA + timedelta(days=dias_apos_consulta),
+    )
+
+    assert retorno.tipo_servico == "consulta_rotina"
+    assert retorno.valor == Decimal("0.00")
+    assert animal.total_gasto() == Decimal("100.00")
+
+
+def test_registrar_novo_atendimento_de_rotina_apos_dois_dias_deve_ser_cobrado():
+    animal = criar_animal_com_rotina()
+
+    atendimento = registrar_atendimento(
+        animal,
+        "consulta_rotina",
+        data=DATA_CONSULTA + timedelta(days=2),
+    )
+
+    assert atendimento.tipo_servico == "consulta_rotina"
+    assert atendimento.valor == Decimal("100.00")
+    assert animal.total_gasto() == Decimal("200.00")
+
+
+def test_retorno_no_mesmo_dia_nao_deve_ser_cobrado():
+    animal = criar_animal_com_rotina()
+
+    retorno = registrar_retorno(animal, DATA_CONSULTA)
 
     assert retorno.valor == Decimal("0.00")
     assert retorno in animal.atendimentos
     assert animal.total_gasto() == Decimal("100.00")
 
 
-def test_retorno_com_exatos_15_dias_deve_ser_gratuito():
+def test_retorno_no_dia_seguinte_nao_deve_ser_cobrado():
     animal = criar_animal_com_rotina()
 
-    retorno = registrar_retorno(animal, DATA_CONSULTA + timedelta(days=15))
+    retorno = registrar_retorno(animal, DATA_CONSULTA + timedelta(days=1))
 
     assert retorno.valor == Decimal("0.00")
+    assert retorno in animal.atendimentos
+    assert animal.total_gasto() == Decimal("100.00")
 
 
-def test_retorno_apos_15_dias_deve_ser_cobrado():
+@pytest.mark.parametrize(
+    "data_retorno",
+    [
+        DATA_CONSULTA - timedelta(days=1),
+        DATA_CONSULTA + timedelta(days=2),
+        DATA_CONSULTA + timedelta(days=7),
+        DATA_CONSULTA + timedelta(days=30),
+    ],
+)
+def test_retorno_fora_do_periodo_gratuito_deve_ser_cobrado(data_retorno):
     animal = criar_animal_com_rotina()
 
-    retorno = registrar_retorno(animal, DATA_CONSULTA + timedelta(days=16))
+    retorno = registrar_retorno(animal, data_retorno)
 
     assert retorno.valor == Decimal("100.00")
     assert animal.total_gasto() == Decimal("200.00")
+
+
+def test_retorno_no_dia_seguinte_continua_gratuito_com_fidelidade():
+    animal = criar_animal_com_rotina()
+
+    for _ in range(4):
+        registrar_atendimento(animal, "consulta_rotina")
+
+    retorno = registrar_retorno(animal, DATA_CONSULTA + timedelta(days=1))
+
+    assert animal.quantidade_atendimentos() == 6
+    assert retorno.valor == Decimal("0.00")
+    assert animal.total_gasto() == Decimal("500.00")
+
+
+def test_retorno_fora_do_prazo_com_fidelidade_recebe_desconto():
+    animal = criar_animal_com_rotina()
+
+    for _ in range(4):
+        registrar_atendimento(animal, "consulta_rotina")
+
+    retorno = registrar_retorno(animal, DATA_CONSULTA + timedelta(days=2))
+
+    assert animal.quantidade_atendimentos() == 6
+    assert retorno.valor == Decimal("90.00")
+    assert animal.total_gasto() == Decimal("590.00")
 
 
 def test_retorno_deve_pertencer_ao_mesmo_animal():
@@ -272,7 +389,7 @@ def test_retorno_deve_pertencer_ao_mesmo_animal():
 
     assert identificar_retorno(outro_animal, DATA_CONSULTA) is None
 
-    retorno = registrar_retorno(outro_animal, DATA_CONSULTA + timedelta(days=5))
+    retorno = registrar_retorno(outro_animal, DATA_CONSULTA + timedelta(days=1))
 
     assert retorno.valor == Decimal("100.00")
     assert len(animal_atendido.atendimentos) == 1

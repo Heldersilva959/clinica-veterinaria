@@ -5,7 +5,7 @@ from clinica.dominio.servico import obter_servico
 
 PERCENTUAL_DESCONTO_FIDELIDADE = Decimal("0.10")
 ATENDIMENTOS_ANTERIORES_PARA_FIDELIDADE = 5
-DIAS_PARA_RETORNO_GRATUITO = 15
+DIAS_PARA_RETORNO_GRATUITO = 1
 
 
 def calcular_valor(tipo_servico: str) -> Decimal:
@@ -83,7 +83,6 @@ def esta_dentro_do_periodo_de_retorno(
     data_consulta: date,
     data_retorno: date,
 ) -> bool:
-    if data_retorno < data_consulta:
-        return False
+    dias_apos_consulta = (data_retorno - data_consulta).days
 
-    return (data_retorno - data_consulta).days <= DIAS_PARA_RETORNO_GRATUITO
+    return 0 <= dias_apos_consulta <= DIAS_PARA_RETORNO_GRATUITO
