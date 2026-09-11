@@ -48,13 +48,14 @@ def identificar_retorno(
     animal: Animal,
     data_retorno: date,
 ) -> Atendimento | None:
-    """Atendimento que permite retorno no mesmo dia ou no seguinte.
+    """Atendimento cobrado que permite retorno no mesmo dia ou no seguinte.
 
-    A regra considera somente o histórico do próprio animal. A data é sempre
-    recebida de fora, nunca lida do relógio do sistema.
+    A regra considera somente o histórico do próprio animal e ignora
+    atendimentos gratuitos, para que um retorno não abra novo período de
+    retorno. A data é sempre recebida de fora, nunca lida do relógio do sistema.
     """
     for atendimento in reversed(animal.atendimentos):
-        if atendimento.data is None:
+        if atendimento.data is None or atendimento.valor == Decimal("0.00"):
             continue
 
         if esta_dentro_do_periodo_de_retorno(atendimento.data, data_retorno):
