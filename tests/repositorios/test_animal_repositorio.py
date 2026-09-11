@@ -268,3 +268,76 @@ def test_ordenar_por_total_gasto_nao_altera_valores():
     assert animal_urgencia.total_gasto() == Decimal("180.00")
     assert animal_rotina.atendimentos[0].valor == Decimal("100.00")
     assert animal_urgencia.atendimentos[0].valor == Decimal("180.00")
+
+
+def test_ranking_animais_por_total_gasto():
+    repositorio = AnimalRepositorio()
+    rex = criar_animal("Rex")
+    mia = criar_animal("Mia")
+    bidu = criar_animal("Bidu")
+
+    registrar_atendimento(rex, "consulta_rotina")
+    registrar_atendimento(mia, "consulta_emergencia")
+    registrar_atendimento(bidu, "consulta_urgencia")
+
+    repositorio.adicionar(rex)
+    repositorio.adicionar(mia)
+    repositorio.adicionar(bidu)
+
+    ranking = repositorio.ranking_por_total_gasto()
+
+    assert ranking == [mia, bidu, rex]
+
+    # O ranking e uma consulta: nao altera a ordem interna do repositorio.
+    assert repositorio.listar() == [rex, mia, bidu]
+
+
+def test_ranking_deve_ser_decrescente():
+    repositorio = AnimalRepositorio()
+    rex = criar_animal("Rex")
+    mia = criar_animal("Mia")
+    bidu = criar_animal("Bidu")
+
+    registrar_atendimento(rex, "consulta_rotina")
+
+    registrar_atendimento(mia, "consulta_rotina")
+    registrar_atendimento(mia, "consulta_urgencia")
+
+    registrar_atendimento(bidu, "consulta_urgencia")
+
+    repositorio.adicionar(rex)
+    repositorio.adicionar(mia)
+    repositorio.adicionar(bidu)
+
+    ranking = repositorio.ranking_por_total_gasto()
+
+    totais = [animal.total_gasto() for animal in ranking]
+
+    assert totais == [
+        Decimal("280.00"),
+        Decimal("180.00"),
+        Decimal("100.00"),
+    ]
+    assert totais == sorted(totais, reverse=True)
+
+
+def test_ranking_com_animais_sem_atendimentos():
+    repositorio = AnimalRepositorio()
+    sem_atendimento = criar_animal("Mia")
+    com_atendimento = criar_animal("Rex")
+
+    registrar_atendimento(com_atendimento, "consulta_rotina")
+
+    repositorio.adicionar(sem_atendimento)
+    repositorio.adicionar(com_atendimento)
+
+    ranking = repositorio.ranking_por_total_gasto()
+
+    assert ranking == [com_atendimento, sem_atendimento]
+    assert sem_atendimento.total_gasto() == Decimal("0.00")
+
+
+def test_ranking_lista_vazia():
+    repositorio = AnimalRepositorio()
+
+    assert repositorio.ranking_por_total_gasto() == []

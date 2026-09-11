@@ -73,3 +73,10 @@ class AnimalRepositorio:
         self._animais.sort(
             key=lambda animal: animal.total_gasto(),
         )
+
+    def ranking_por_total_gasto(self) -> list[Animal]:
+        return sorted(
+            self._animais,
+            key=lambda animal: animal.total_gasto(),
+            reverse=True,
+        )
