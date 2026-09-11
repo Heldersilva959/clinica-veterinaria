@@ -1,20 +1,15 @@
 from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 
+from clinica.dominio.servico import obter_servico
+
 PERCENTUAL_DESCONTO_FIDELIDADE = Decimal("0.10")
 ATENDIMENTOS_ANTERIORES_PARA_FIDELIDADE = 5
 DIAS_PARA_RETORNO_GRATUITO = 15
 
 
 def calcular_valor(tipo_servico: str) -> Decimal:
-    if tipo_servico == "consulta_rotina":
-        return Decimal("100.00")
-    elif tipo_servico == "consulta_urgencia":
-        return Decimal("180.00")
-    elif tipo_servico == "consulta_emergencia":
-        return Decimal("250.00")
-
-    raise ValueError("Tipo de serviço inválido")
+    return obter_servico(tipo_servico).valor
 
 
 def validar_valor_servico(valor: Decimal) -> None:
