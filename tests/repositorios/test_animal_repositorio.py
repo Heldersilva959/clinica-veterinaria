@@ -28,6 +28,7 @@ def test_registrar_novo_animal_sem_atendimentos():
     assert animal_encontrado == animal
     assert animal_encontrado.atendimentos == []
 
+
 def test_lista_animais_deve_iniciar_vazia():
     repositorio = AnimalRepositorio()
 
@@ -108,6 +109,7 @@ def test_nao_permitir_animais_com_mesmo_id():
         repositorio.adicionar(segundo_animal)
 
     assert repositorio.listar() == [primeiro_animal] 
+
 def test_remover_animais_sem_atendimentos():
     repositorio = AnimalRepositorio()
     responsavel = Responsavel(nome="Maria")
@@ -194,3 +196,75 @@ def test_filtrar_animais_com_gasto_acima_de_limite():
     # "acima de" e estritamente maior: o valor exato do limite fica de fora.
     assert repositorio.filtrar_por_gasto_acima_de(Decimal("250.00")) == []
     assert repositorio.filtrar_por_gasto_acima_de(Decimal("0.00")) == [rex, mia]
+def test_ordenar_animais_por_nome():
+    repositorio = AnimalRepositorio()
+    zeca = criar_animal("Zeca")
+    bidu = criar_animal("Bidu")
+    amora = criar_animal("Amora")
+
+    repositorio.adicionar(zeca)
+    repositorio.adicionar(bidu)
+    repositorio.adicionar(amora)
+
+    repositorio.ordenar_por_nome()
+
+    assert repositorio.listar() == [amora, bidu, zeca]
+
+def test_ordenar_animais_por_total_gasto():
+    repositorio = AnimalRepositorio()
+    animal_urgencia = criar_animal("Rex")
+    animal_sem_atendimento = criar_animal("Mia")
+    animal_rotina = criar_animal("Bidu")
+
+    animal_urgencia.adicionar_atendimento(
+        Atendimento(
+            tipo_servico="consulta_urgencia",
+            valor=Decimal("180.00"),
+        )
+    )
+    animal_rotina.adicionar_atendimento(
+        Atendimento(
+            tipo_servico="consulta_rotina",
+            valor=Decimal("100.00"),
+        )
+    )
+
+    repositorio.adicionar(animal_urgencia)
+    repositorio.adicionar(animal_sem_atendimento)
+    repositorio.adicionar(animal_rotina)
+
+    repositorio.ordenar_por_total_gasto()
+
+    assert repositorio.listar() == [
+        animal_sem_atendimento,
+        animal_rotina,
+        animal_urgencia,
+    ]
+
+def test_ordenar_por_total_gasto_nao_altera_valores():
+    repositorio = AnimalRepositorio()
+    animal_rotina = criar_animal("Rex")
+    animal_urgencia = criar_animal("Mia")
+
+    animal_rotina.adicionar_atendimento(
+        Atendimento(
+            tipo_servico="consulta_rotina",
+            valor=Decimal("100.00"),
+        )
+    )
+    animal_urgencia.adicionar_atendimento(
+        Atendimento(
+            tipo_servico="consulta_urgencia",
+            valor=Decimal("180.00"),
+        )
+    )
+
+    repositorio.adicionar(animal_urgencia)
+    repositorio.adicionar(animal_rotina)
+
+    repositorio.ordenar_por_total_gasto()
+
+    assert animal_rotina.total_gasto() == Decimal("100.00")
+    assert animal_urgencia.total_gasto() == Decimal("180.00")
+    assert animal_rotina.atendimentos[0].valor == Decimal("100.00")
+    assert animal_urgencia.atendimentos[0].valor == Decimal("180.00")

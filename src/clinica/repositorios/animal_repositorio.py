@@ -64,3 +64,12 @@ class AnimalRepositorio:
             for animal in self._animais
             if animal.total_gasto() > limite
         ]
+    def ordenar_por_nome(self) -> None:
+        self._animais.sort(
+            key=lambda animal: animal.nome,
+        )
+
+    def ordenar_por_total_gasto(self) -> None:
+        self._animais.sort(
+            key=lambda animal: animal.total_gasto(),
+        )
