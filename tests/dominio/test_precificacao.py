@@ -38,10 +38,22 @@ def test_nao_permitir_valor_servico_negativo():
         validar_valor_servico(Decimal("-10.00"))
 
 def test_calcular_valores_decimais():
-    valor = calcular_valor("consulta_urgencia")
+    valor = calcular_valor_atendimento(
+        "consulta_rotina",
+        acrescimo=Decimal("35.50"),
+    )
 
     assert isinstance(valor, Decimal)
-    assert valor == Decimal("180.00")
+    assert valor == Decimal("135.50")
+
+    # 180,00 + 12,75 = 192,75; com 10% de fidelidade = 173,475 -> 173,48
+    valor_com_fidelidade = calcular_valor_atendimento(
+        "consulta_urgencia",
+        quantidade_atendimentos_anteriores=5,
+        acrescimo=Decimal("12.75"),
+    )
+
+    assert valor_com_fidelidade == Decimal("173.48")
 
 def test_tipo_servico_invalido_lanca_excecao():
     with pytest.raises(
