@@ -1,6 +1,8 @@
 from uuid import uuid4
 import pytest
 from decimal import Decimal
+
+from clinica.aplicacao.atendimento_service import registrar_atendimento
 from clinica.dominio.animal import Animal
 from clinica.dominio.atendimento import Atendimento
 from clinica.dominio.responsavel import Responsavel
@@ -143,6 +145,57 @@ def test_nao_remover_animal_com_atendimentos():
     assert repositorio.listar() == [animal]
     assert repositorio.buscar_por_id(animal.id) == animal
 
+def criar_repositorio_com_especies():
+    repositorio = AnimalRepositorio()
+    responsavel = Responsavel(nome="Maria")
+
+    rex = Animal(nome="Rex", especie="cachorro", responsavel=responsavel)
+    mia = Animal(nome="Mia", especie="gato", responsavel=responsavel)
+    bob = Animal(nome="Bob", especie="cachorro", responsavel=responsavel)
+
+    for animal in (rex, mia, bob):
+        repositorio.adicionar(animal)
+
+    return repositorio, rex, mia, bob
+
+
+def test_filtrar_animais_por_especie():
+    repositorio, rex, mia, bob = criar_repositorio_com_especies()
+
+    cachorros = repositorio.filtrar_por_especie("cachorro")
+
+    assert cachorros == [rex, bob]
+    assert mia not in cachorros
+    assert repositorio.filtrar_por_especie("gato") == [mia]
+
+
+def test_filtro_sem_resultados_retorna_lista_vazia():
+    repositorio, _, _, _ = criar_repositorio_com_especies()
+
+    assert repositorio.filtrar_por_especie("coelho") == []
+    assert repositorio.filtrar_por_gasto_acima_de(Decimal("1000.00")) == []
+
+    repositorio_vazio = AnimalRepositorio()
+
+    assert repositorio_vazio.filtrar_por_especie("cachorro") == []
+
+
+def test_filtrar_animais_com_gasto_acima_de_limite():
+    repositorio, rex, mia, bob = criar_repositorio_com_especies()
+
+    registrar_atendimento(rex, "consulta_emergencia")
+    registrar_atendimento(mia, "consulta_rotina")
+
+    assert rex.total_gasto() == Decimal("250.00")
+    assert mia.total_gasto() == Decimal("100.00")
+    assert bob.total_gasto() == Decimal("0.00")
+
+    assert repositorio.filtrar_por_gasto_acima_de(Decimal("150.00")) == [rex]
+    assert repositorio.filtrar_por_gasto_acima_de(Decimal("50.00")) == [rex, mia]
+
+    # "acima de" e estritamente maior: o valor exato do limite fica de fora.
+    assert repositorio.filtrar_por_gasto_acima_de(Decimal("250.00")) == []
+    assert repositorio.filtrar_por_gasto_acima_de(Decimal("0.00")) == [rex, mia]
 def test_ordenar_animais_por_nome():
     repositorio = AnimalRepositorio()
     zeca = criar_animal("Zeca")

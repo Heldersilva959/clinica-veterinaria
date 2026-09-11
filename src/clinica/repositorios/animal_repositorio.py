@@ -51,6 +51,19 @@ class AnimalRepositorio:
             if animal.quantidade_atendimentos() > 0
         ]
 
+    def filtrar_por_especie(self, especie: str) -> list[Animal]:
+        return [
+            animal
+            for animal in self._animais
+            if animal.especie == especie
+        ]
+
+    def filtrar_por_gasto_acima_de(self, limite: Decimal) -> list[Animal]:
+        return [
+            animal
+            for animal in self._animais
+            if animal.total_gasto() > limite
+        ]
     def ordenar_por_nome(self) -> None:
         self._animais.sort(
             key=lambda animal: animal.nome,
