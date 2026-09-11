@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import date
 from decimal import Decimal
 
 
@@ -6,3 +7,4 @@ from decimal import Decimal
 class Atendimento:
     tipo_servico: str
     valor: Decimal
+    data: date | None = None
