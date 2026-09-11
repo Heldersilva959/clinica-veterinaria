@@ -194,9 +194,10 @@ def test_sexto_atendimento_recebe_desconto_fidelidade():
     assert sexto_atendimento.valor == Decimal("90.00")
 
 
-# Regra de retorno (definida com o usuário):
-# um novo atendimento no mesmo dia ou no dia seguinte a qualquer atendimento
+# Regra de retorno (definida pela equipe):
+# um novo atendimento no mesmo dia ou no dia seguinte a um atendimento cobrado
 # do mesmo animal é registrado como retorno e não gera nova cobrança.
+# O retorno gratuito não abre um novo período de retorno.
 
 DATA_CONSULTA = date(2026, 3, 1)
 
@@ -282,6 +283,21 @@ def test_retorno_deve_permitir_novo_retorno_no_dia_seguinte():
     assert segundo_retorno.tipo_servico == "consulta_emergencia"
     assert segundo_retorno.valor == Decimal("0.00")
     assert animal.total_gasto() == Decimal("100.00")
+
+
+def test_retorno_gratuito_nao_abre_novo_periodo_de_retorno():
+    animal = criar_animal_com_rotina()
+    retorno = registrar_retorno(animal, DATA_CONSULTA + timedelta(days=1))
+
+    atendimento = registrar_atendimento(
+        animal,
+        "consulta_rotina",
+        data=DATA_CONSULTA + timedelta(days=2),
+    )
+
+    assert retorno.valor == Decimal("0.00")
+    assert atendimento.valor == Decimal("100.00")
+    assert animal.total_gasto() == Decimal("200.00")
 
 
 @pytest.mark.parametrize("dias_apos_consulta", [0, 1])
