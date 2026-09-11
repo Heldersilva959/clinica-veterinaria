@@ -67,6 +67,12 @@ def test_buscar_animal_por_nome():
 
     assert animal_encontrado is mia
 
+def test_buscar_animal_por_nome_inexistente_retorna_none():
+    repositorio = AnimalRepositorio()
+    repositorio.adicionar(criar_animal("Rex"))
+
+    assert repositorio.buscar_por_nome("Mia") is None
+
 def test_remover_animal_da_lista():
     repositorio = AnimalRepositorio()
     animal = criar_animal("Rex")
@@ -76,6 +82,15 @@ def test_remover_animal_da_lista():
 
     assert repositorio.listar() == []
     assert repositorio.buscar_por_id(animal.id) is None
+
+def test_remover_animal_inexistente_nao_altera_lista():
+    repositorio = AnimalRepositorio()
+    animal = criar_animal("Rex")
+    repositorio.adicionar(animal)
+
+    repositorio.remover(uuid4())
+
+    assert repositorio.listar() == [animal]
 
 def test_buscar_animal_por_id():
     repositorio = AnimalRepositorio()
