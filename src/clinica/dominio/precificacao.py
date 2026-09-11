@@ -1,7 +1,9 @@
+from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 
 PERCENTUAL_DESCONTO_FIDELIDADE = Decimal("0.10")
 ATENDIMENTOS_ANTERIORES_PARA_FIDELIDADE = 5
+DIAS_PARA_RETORNO_GRATUITO = 15
 
 
 def calcular_valor(tipo_servico: str) -> Decimal:
@@ -80,3 +82,13 @@ def calcular_valor_atendimento(
     validar_valor_final(valor_final)
 
     return valor_final
+
+
+def esta_dentro_do_periodo_de_retorno(
+    data_consulta: date,
+    data_retorno: date,
+) -> bool:
+    if data_retorno < data_consulta:
+        return False
+
+    return (data_retorno - data_consulta).days <= DIAS_PARA_RETORNO_GRATUITO
