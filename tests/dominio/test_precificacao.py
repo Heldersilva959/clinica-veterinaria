@@ -8,7 +8,6 @@ from clinica.dominio.precificacao import PERCENTUAL_DESCONTO_FIDELIDADE
 from clinica.dominio.precificacao import aplicar_desconto_fidelidade
 from clinica.dominio.precificacao import tem_desconto_fidelidade
 from clinica.dominio.precificacao import calcular_valor_atendimento
-from clinica.dominio.precificacao import somar_acrescimos
 from clinica.dominio.precificacao import validar_valor_final
 from clinica.dominio.precificacao import validar_acrescimo
 from clinica.dominio.precificacao import validar_desconto
@@ -106,20 +105,6 @@ def test_aplicar_acrescimo_procedimento_adicional():
 
     assert valor == Decimal("150.00")
     assert isinstance(valor, Decimal)
-
-
-def test_multiplos_acrescimos_devem_ser_somados():
-    acrescimos = [Decimal("50.00"), Decimal("30.00"), Decimal("20.00")]
-
-    assert somar_acrescimos(acrescimos) == Decimal("100.00")
-    assert somar_acrescimos([]) == Decimal("0.00")
-
-    valor = calcular_valor_atendimento(
-        "consulta_rotina",
-        acrescimo=somar_acrescimos(acrescimos),
-    )
-
-    assert valor == Decimal("200.00")
 
 
 def test_calcular_atendimento_com_desconto_e_acrescimo():

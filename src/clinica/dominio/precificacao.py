@@ -50,12 +50,9 @@ def tem_desconto_fidelidade(quantidade_atendimentos_anteriores: int) -> bool:
 
 def aplicar_desconto_fidelidade(valor: Decimal) -> Decimal:
     desconto = valor * PERCENTUAL_DESCONTO_FIDELIDADE
+    validar_desconto(desconto, valor)
 
     return arredondar(valor - desconto)
-
-
-def somar_acrescimos(acrescimos: list[Decimal]) -> Decimal:
-    return sum(acrescimos, Decimal("0.00"))
 
 
 def calcular_valor_atendimento(
