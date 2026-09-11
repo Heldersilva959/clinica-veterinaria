@@ -341,3 +341,66 @@ def test_ranking_lista_vazia():
     repositorio = AnimalRepositorio()
 
     assert repositorio.ranking_por_total_gasto() == []
+
+def test_calcular_total_gasto_lista_animais():
+    repositorio = AnimalRepositorio()
+    rex = criar_animal("Rex")
+    mia = criar_animal("Mia")
+
+    rex.adicionar_atendimento(
+        Atendimento(
+            tipo_servico="consulta_rotina",
+            valor=Decimal("100.00"),
+        )
+    )
+    mia.adicionar_atendimento(
+        Atendimento(
+            tipo_servico="consulta_urgencia",
+            valor=Decimal("180.00"),
+        )
+    )
+
+    repositorio.adicionar(rex)
+    repositorio.adicionar(mia)
+
+    total = repositorio.calcular_faturamento_total()
+
+    assert total == Decimal("280.00")
+
+def test_somar_faturamento_total_lista():
+    repositorio = AnimalRepositorio()
+    rex = criar_animal("Rex")
+    mia = criar_animal("Mia")
+
+    rex.adicionar_atendimento(
+        Atendimento(
+            tipo_servico="consulta_rotina",
+            valor=Decimal("100.00"),
+        )
+    )
+    rex.adicionar_atendimento(
+        Atendimento(
+            tipo_servico="consulta_urgencia",
+            valor=Decimal("180.00"),
+        )
+    )
+    mia.adicionar_atendimento(
+        Atendimento(
+            tipo_servico="consulta_emergencia",
+            valor=Decimal("250.00"),
+        )
+    )
+
+    repositorio.adicionar(rex)
+    repositorio.adicionar(mia)
+
+    faturamento = repositorio.calcular_faturamento_total()
+
+    assert faturamento == Decimal("530.00")
+
+def test_faturamento_lista_vazia_deve_ser_zero():
+    repositorio = AnimalRepositorio()
+
+    faturamento = repositorio.calcular_faturamento_total()
+
+    assert faturamento == Decimal("0.00")

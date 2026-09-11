@@ -80,3 +80,9 @@ class AnimalRepositorio:
             key=lambda animal: animal.total_gasto(),
             reverse=True,
         )
+
+    def calcular_faturamento_total(self) -> Decimal:
+        return sum(
+            (animal.total_gasto() for animal in self._animais),
+            Decimal("0.00"),
+        )
