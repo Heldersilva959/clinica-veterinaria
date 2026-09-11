@@ -3,7 +3,7 @@
 venv/
 
 # Bytecode e caches do Python
-__pycache__/
+_pycache_/
 *.py[cod]
 *$py.class
 

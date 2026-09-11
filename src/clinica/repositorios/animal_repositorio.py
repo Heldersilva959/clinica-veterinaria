@@ -1,3 +1,4 @@
+from decimal import Decimal
 from uuid import UUID
 
 from clinica.dominio.animal import Animal
@@ -58,4 +59,10 @@ class AnimalRepositorio:
     def ordenar_por_total_gasto(self) -> None:
         self._animais.sort(
             key=lambda animal: animal.total_gasto(),
+        )
+
+    def calcular_faturamento_total(self) -> Decimal:
+        return sum(
+            (animal.total_gasto() for animal in self._animais),
+            Decimal("0.00"),
         )
