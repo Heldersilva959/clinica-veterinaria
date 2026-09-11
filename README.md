@@ -83,6 +83,22 @@ Não serão utilizados:
 
 O objetivo é manter o projeto simples e focado em testes e regras de negócio.
 
+## Demonstração manual
+
+O projeto inclui uma demonstração visual no terminal. Ela cadastra animais e
+responsáveis, registra atendimentos, aplica fidelidade, acréscimo e retorno
+gratuito, e mostra buscas, filtros, ordenações, ranking, remoção e faturamento.
+
+Na raiz do projeto, execute:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+python demo_manual.py
+```
+
+A demonstração usa somente dados em memória e verifica os resultados com
+asserções antes de apresentar a mensagem de sucesso.
+
 ## Arquitetura
 
 O projeto utiliza uma arquitetura em camadas simplificada, inspirada em conceitos de Clean Architecture.

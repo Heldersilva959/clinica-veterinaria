@@ -27,6 +27,23 @@ def test_registrar_atendimento_para_animal():
     assert atendimento in animal.atendimentos
 
 
+def test_registrar_atendimento_com_acrescimo():
+    animal = Animal(
+        nome="Rex",
+        especie="cachorro",
+        responsavel=Responsavel(nome="Maria"),
+    )
+
+    atendimento = registrar_atendimento(
+        animal,
+        "consulta_rotina",
+        acrescimo=Decimal("35.50"),
+    )
+
+    assert atendimento.valor == Decimal("135.50")
+    assert atendimento in animal.atendimentos
+
+
 def test_animal_deve_possuir_um_atendimento_apos_registro():
 
     responsavel = Responsavel(nome="Maria")

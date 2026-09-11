@@ -14,10 +14,12 @@ def registrar_atendimento(
     animal: Animal,
     tipo_servico: str,
     data: date | None = None,
+    acrescimo: Decimal = Decimal("0.00"),
 ) -> Atendimento:
     valor = calcular_valor_atendimento(
         tipo_servico,
         quantidade_atendimentos_anteriores=animal.quantidade_atendimentos(),
+        acrescimo=acrescimo,
     )
     validar_valor_servico(valor)
 
