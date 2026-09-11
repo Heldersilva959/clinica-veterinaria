@@ -10,7 +10,7 @@ _pycache_/
 # Caches de ferramentas
 .pytest_cache/
 .coverage
-htmlcov/
+
 
 # Editores / SO
 .vscode/
